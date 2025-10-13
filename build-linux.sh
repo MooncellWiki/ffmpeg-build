@@ -16,11 +16,30 @@ fi
 
 OUTPUT_DIR=artifacts/ffmpeg-$FFMPEG_VERSION-audio-$ARCH-linux-gnu
 
+DPKG_ARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+LD_DIR=/usr/lib/$DPKG_ARCH
+INCLUDE_DIR=/usr/include
+
+sudo mv ${LD_DIR}/libmp3lame.so ${LD_DIR}/libmp3lame.so.bak
+sudo mv ${LD_DIR}/libmp3lame.so.0 ${LD_DIR}/libmp3lame.so.0.bak
+sudo mv ${LD_DIR}/libmp3lame.so.0.0.0 ${LD_DIR}/libmp3lame.so.0.0.0.bak
+
+BUILD_DIR=$(mktemp -d -p $(pwd) build.XXXXXXXX)
+trap 'rm -rf $BUILD_DIR' EXIT
+
 case $ARCH in
     x86_64)
+        FFMPEG_CONFIGURE_FLAGS+=(
+            --extra-cflags="-I$INCLUDE_DIR"
+            --extra-ldflags="-L$LD_DIR"
+        )
         ;;
     i686)
-        FFMPEG_CONFIGURE_FLAGS+=(--cc="gcc -m32")
+        FFMPEG_CONFIGURE_FLAGS+=(
+            --cc="gcc -m32"
+            --extra-cflags="-I$INCLUDE_DIR"
+            --extra-ldflags="-L$LD_DIR"
+        )
         ;;
     arm64)
         FFMPEG_CONFIGURE_FLAGS+=(
@@ -28,6 +47,8 @@ case $ARCH in
             --cross-prefix=aarch64-linux-gnu-
             --target-os=linux
             --arch=aarch64
+            --extra-cflags="-I$INCLUDE_DIR"
+            --extra-ldflags="-L$LD_DIR"
         )
         ;;
     arm*)
@@ -41,23 +62,29 @@ case $ARCH in
             armv7-a)
                 FFMPEG_CONFIGURE_FLAGS+=(
                     --cpu=armv7-a
+                    --extra-cflags="-I$INCLUDE_DIR"
+                    --extra-ldflags="-L$LD_DIR"
                 )
                 ;;
             armv8-a)
                 FFMPEG_CONFIGURE_FLAGS+=(
                     --cpu=armv8-a
+                    --extra-cflags="-I$INCLUDE_DIR"
+                    --extra-ldflags="-L$LD_DIR"
                 )
                 ;;
             armhf-rpi2)
                 FFMPEG_CONFIGURE_FLAGS+=(
                     --cpu=cortex-a7
-                    --extra-cflags='-fPIC -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad'
+                    --extra-cflags="-fPIC -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -I$INCLUDE_DIR"
+                    --extra-ldflags="-L$LD_DIR"
                 )
                 ;;
             armhf-rpi3)
                 FFMPEG_CONFIGURE_FLAGS+=(
                     --cpu=cortex-a53
-                    --extra-cflags='-fPIC -mcpu=cortex-a53 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mvectorize-with-neon-quad'
+                    --extra-cflags="-fPIC -mcpu=cortex-a53 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mvectorize-with-neon-quad -I$INCLUDE_DIR"
+                    --extra-ldflags="-L$LD_DIR"
                 )
                 ;;
         esac
@@ -68,9 +95,6 @@ case $ARCH in
         ;;
 esac
 
-BUILD_DIR=$(mktemp -d -p $(pwd) build.XXXXXXXX)
-trap 'rm -rf $BUILD_DIR' EXIT
-
 cd $BUILD_DIR
 tar --strip-components=1 -xf $BASE_DIR/$FFMPEG_TARBALL
 
@@ -80,5 +104,9 @@ FFMPEG_CONFIGURE_FLAGS+=(--prefix=$BASE_DIR/$OUTPUT_DIR)
 
 make
 make install
+
+sudo mv ${LD_DIR}/libmp3lame.so.bak ${LD_DIR}/libmp3lame.so
+sudo mv ${LD_DIR}/libmp3lame.so.0.bak ${LD_DIR}/libmp3lame.so.0
+sudo mv ${LD_DIR}/libmp3lame.so.0.0.0.bak ${LD_DIR}/libmp3lame.so.0.0.0
 
 chown $(stat -c '%u:%g' $BASE_DIR) -R $BASE_DIR/$OUTPUT_DIR

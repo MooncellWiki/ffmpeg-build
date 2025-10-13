@@ -35,22 +35,26 @@ trap 'rm -rf $BUILD_DIR' EXIT
 cd $BUILD_DIR
 tar --strip-components=1 -xf $BASE_DIR/$FFMPEG_TARBALL
 
+HOMEBREW_PATH=$(brew --prefix)
+
 FFMPEG_CONFIGURE_FLAGS+=(
     --cc=/usr/bin/clang
     --prefix=$BASE_DIR/$OUTPUT_DIR
     --enable-cross-compile
     --target-os=darwin
     --arch=$ARCH
-    --extra-ldflags="-target $TARGET"
-    --extra-cflags="-target $TARGET"
+    --extra-ldflags="-target $TARGET -L$HOMEBREW_PATH/lib"
+    --extra-cflags="-target $TARGET -I$HOMEBREW_PATH/include"
     --enable-runtime-cpudetect
 )
+
+sed -i '' "s|-lmp3lame|${HOMEBREW_PATH}/lib/libmp3lame.a|g" configure
 
 ./configure "${FFMPEG_CONFIGURE_FLAGS[@]}" || (cat ffbuild/config.log && exit 1)
 
 perl -pi -e 's{HAVE_MACH_MACH_TIME_H 1}{HAVE_MACH_MACH_TIME_H 0}' config.h
 
-make V=1
+make V=1 -j$(sysctl -n hw.ncpu)
 make install
 
 chown -R $(stat -f '%u:%g' $BASE_DIR) $BASE_DIR/$OUTPUT_DIR
