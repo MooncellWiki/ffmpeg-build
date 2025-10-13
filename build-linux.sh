@@ -20,19 +20,11 @@ DPKG_ARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 LD_DIR=/usr/lib/$DPKG_ARCH
 INCLUDE_DIR=/usr/include
 
-sudo mv ${LD_DIR}/libmp3lame.so ${LD_DIR}/libmp3lame.so.bak
-sudo mv ${LD_DIR}/libmp3lame.so.0 ${LD_DIR}/libmp3lame.so.0.bak
-sudo mv ${LD_DIR}/libmp3lame.so.0.0.0 ${LD_DIR}/libmp3lame.so.0.0.0.bak
-
 BUILD_DIR=$(mktemp -d -p $(pwd) build.XXXXXXXX)
 trap 'rm -rf $BUILD_DIR' EXIT
 
 case $ARCH in
     x86_64)
-        FFMPEG_CONFIGURE_FLAGS+=(
-            --extra-cflags="-I$INCLUDE_DIR"
-            --extra-ldflags="-L$LD_DIR"
-        )
         ;;
     i686)
         FFMPEG_CONFIGURE_FLAGS+=(
@@ -100,13 +92,11 @@ tar --strip-components=1 -xf $BASE_DIR/$FFMPEG_TARBALL
 
 FFMPEG_CONFIGURE_FLAGS+=(--prefix=$BASE_DIR/$OUTPUT_DIR)
 
+sed -i "s|-lmp3lame|-l:libmp3lame.a|g" configure
+
 ./configure "${FFMPEG_CONFIGURE_FLAGS[@]}" || (cat ffbuild/config.log && exit 1)
 
 make
 make install
-
-sudo mv ${LD_DIR}/libmp3lame.so.bak ${LD_DIR}/libmp3lame.so
-sudo mv ${LD_DIR}/libmp3lame.so.0.bak ${LD_DIR}/libmp3lame.so.0
-sudo mv ${LD_DIR}/libmp3lame.so.0.0.0.bak ${LD_DIR}/libmp3lame.so.0.0.0
 
 chown $(stat -c '%u:%g' $BASE_DIR) -R $BASE_DIR/$OUTPUT_DIR
