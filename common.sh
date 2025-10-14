@@ -185,6 +185,17 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-parser=vorbis
 
     --enable-muxer=mp3
+    --enable-muxer=wav
     --enable-encoder=libmp3lame
+    --enable-encoder=pcm_s16le
+    --enable-encoder=pcm_s16be
+    --enable-encoder=pcm_s24le
+    --enable-encoder=pcm_s24be
+    --enable-encoder=pcm_s32le
+    --enable-encoder=pcm_s32be
+    --enable-encoder=pcm_f32le
+    --enable-encoder=pcm_f32be
+    --enable-encoder=pcm_f64le
+    --enable-encoder=pcm_f64be
     --enable-libmp3lame
 )
