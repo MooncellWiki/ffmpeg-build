@@ -53,6 +53,9 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-protocol=file
     --enable-protocol=pipe
 
+    --enable-muxer=mp3
+    --enable-muxer=wav
+
     --enable-demuxer=image2
     --enable-demuxer=aac
     --enable-demuxer=ac3
@@ -184,7 +187,41 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-parser=tak
     --enable-parser=vorbis
 
-    --enable-muxer=mp3
     --enable-encoder=libmp3lame
+
+    --enable-encoder=pcm_alaw
+    --enable-encoder=pcm_alaw_at
+    --enable-encoder=pcm_bluray
+    --enable-encoder=pcm_dvd
+    --enable-encoder=pcm_f32be
+    --enable-encoder=pcm_f32le
+    --enable-encoder=pcm_f64be
+    --enable-encoder=pcm_f64le
+    --enable-encoder=pcm_mulaw
+    --enable-encoder=pcm_mulaw_at
+    --enable-encoder=pcm_s16be
+    --enable-encoder=pcm_s16be_planar
+    --enable-encoder=pcm_s16le
+    --enable-encoder=pcm_s16le_planar
+    --enable-encoder=pcm_s24be
+    --enable-encoder=pcm_s24daud
+    --enable-encoder=pcm_s24le
+    --enable-encoder=pcm_s24le_planar
+    --enable-encoder=pcm_s32be
+    --enable-encoder=pcm_s32le
+    --enable-encoder=pcm_s32le_planar
+    --enable-encoder=pcm_s64be
+    --enable-encoder=pcm_s64le
+    --enable-encoder=pcm_s8
+    --enable-encoder=pcm_s8_planar
+    --enable-encoder=pcm_u16be
+    --enable-encoder=pcm_u16le
+    --enable-encoder=pcm_u24be
+    --enable-encoder=pcm_u24le
+    --enable-encoder=pcm_u32be
+    --enable-encoder=pcm_u32le
+    --enable-encoder=pcm_u8
+    --enable-encoder=pcm_vidc
+
     --enable-libmp3lame
 )
