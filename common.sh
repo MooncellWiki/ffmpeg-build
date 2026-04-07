@@ -48,6 +48,7 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-filter=setpts
     --enable-filter=trim
     --enable-filter=aresample
+    --enable-filter=concat
 
     --disable-protocols
     --enable-protocol=file
@@ -56,6 +57,7 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-muxer=mp3
     --enable-muxer=wav
 
+    --enable-demuxer=concat
     --enable-demuxer=image2
     --enable-demuxer=aac
     --enable-demuxer=ac3
