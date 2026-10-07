@@ -225,5 +225,20 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-encoder=pcm_u8
     --enable-encoder=pcm_vidc
 
+    # CRI USM cutscene remux (torappu `Video` task): the VP9 video stream is
+    # an embedded IVF and is stream-copied into MP4, the ADX audio stream is
+    # transcoded to AAC. The mov/mp4 muxer pulls in the vp9_superframe and
+    # aac_adtstoasc bitstream filters by itself. The vp9 decoder is only used
+    # by avformat_find_stream_info() to probe the pixel format / colour info:
+    # IVF carries neither, and without them the muxer writes an empty vpcC
+    # box ("Unsupported pixel format (-1)") and the MP4 cannot be opened.
+    --enable-demuxer=ivf
+    --enable-demuxer=adx
+    --enable-parser=vp9
+    --enable-decoder=vp9
+    --enable-decoder=adpcm_adx
+    --enable-encoder=aac
+    --enable-muxer=mp4
+
     --enable-libmp3lame
 )

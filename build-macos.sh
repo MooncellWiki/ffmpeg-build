@@ -48,7 +48,14 @@ FFMPEG_CONFIGURE_FLAGS+=(
     --enable-runtime-cpudetect
 )
 
-sed -i '' "s|-lmp3lame|${HOMEBREW_PATH}/lib/libmp3lame.a|g" configure
+# Link the Homebrew libmp3lame statically. LAME >= 4.0 (Homebrew's current
+# bottle) decodes through mpg123, so its static archive also needs libmpg123.a.
+LAME_STATIC_LIBS="${HOMEBREW_PATH}/lib/libmp3lame.a"
+if [ -e "${HOMEBREW_PATH}/lib/libmpg123.a" ]
+then
+    LAME_STATIC_LIBS="$LAME_STATIC_LIBS ${HOMEBREW_PATH}/lib/libmpg123.a"
+fi
+sed -i '' "s|-lmp3lame|${LAME_STATIC_LIBS}|g" configure
 
 ./configure "${FFMPEG_CONFIGURE_FLAGS[@]}" || (cat ffbuild/config.log && exit 1)
 
